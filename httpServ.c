@@ -196,10 +196,14 @@ strcpy(fullpath,directory);
         int fd = open(directory, O_RDONLY);
         int sz = lseek(fd, 0, SEEK_END);;
 
-        sprintf(reply, "HTTP/1.0 200 OK\r\n\r\n");
+        sprintf(reply, "HTTP/1.0 200 OK\r\n"
+                       "Content-Type: text/html\r\n"
+                       "Content-length: %d\r\n"
+                       "Connection: close\r\n"
+                       "\r\n", sz);
         say(connect_d, reply);
            off_t offset = 0;
-           
+
         while (offset < sz)
         {
             offset = sendfile(connect_d, fd, &offset, sz - offset);
@@ -213,7 +217,6 @@ strcpy(fullpath,directory);
         strcpy(reply,"HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\nContent-Type: text/html\r\n\r\n");
         say(connect_d, reply);
         close(connect_d);
-        break;
         exit(0);
     }
 }
@@ -223,4 +226,4 @@ strcpy(directory,fullpath);
   }
   }
   return 0;
-}
+  }
