@@ -84,7 +84,7 @@ void handle_shutdown(int sig)
 {
   if(listener_d)
     close(listener_d);
-  //fprintf(stderr, "Пока !\n");
+  fprintf(stderr, "Пока !\n");
   exit(0);
 }
 
@@ -118,9 +118,9 @@ int main(int argc, char **argv){
         }
 
     }
-        /*puts(ip);
+        puts(ip);
         puts(port);
-        puts(directory);*/
+        puts(directory);
 
  if(catch_signal(SIGINT, handle_shutdown)==-1)
   error("Cant set the interrupt handler");
@@ -133,9 +133,9 @@ int main(int argc, char **argv){
   puts("Waiting for connection");
   char buf[255]={0};;
   char input[200]={0};
-  int position_1=4;
+  int position_1=0;
   int position_2=0;
-  int i=position_1;
+  int i=0;
   if(fork()){
   exit(0);
   }
@@ -153,29 +153,36 @@ strcpy(fullpath,directory);
 
       if(!fork()){
       close(listener_d);
-      if (say(connect_d,"")!=-1)
+      if (1)
       read_in (connect_d, buf,sizeof(buf));
-      //puts(buf);
+      puts(buf);
       if(strncasecmp(" GET",buf,4)){
       strcpy(input,buf);
-      while(i<20)
-      { //printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
-      if(buf[i]==46){
-      if(buf[i+1]==104)
-      if(buf[i+2]==116)
-      if(buf[i+3]==109)
-      break;
+      while(i<sizeof(buf))
+      { printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
+      if(buf[i]==108){
       //printf("%d",i);
+      break;
       }
       i++;
       }
-      position_2=i+3+2;
+      position_2=i+1;
+      i=0;
+      while(i<sizeof(buf))
+      {
+      if(buf[i]==32){
+      //printf("%d",i);
+      break;
+      }
+      i++;
+      }
+      position_1=i+1;
       //printf("I = %d", i); //position_2=15;
       strncpy(htmlpath,&buf[position_1],position_2-position_1);
       //printf("%d",position_2);
       strncat(directory,htmlpath,strlen(htmlpath));
-      //puts("THE PATH IS:");
-      //puts(directory);
+      puts("THE PATH IS:");
+      puts(directory);
 
      //Reply 200 if file exists
           char reply[1024];
@@ -190,9 +197,7 @@ strcpy(fullpath,directory);
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
                        "\r\n", sz);
-
-        ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
-
+        say(connect_d, reply);
 
            off_t offset = 0;
         while (offset < sz)
@@ -211,9 +216,9 @@ strcpy(fullpath,directory);
                       "Content-length: 107\r\n"
                       "Connection: close\r\n"
                       "\r\n");
-        ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+        say(connect_d, reply);
         strcpy(reply, "<body>\n<p>404 Request file not found.</p>\n</body>\n</html>\r\n");
-        send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+        say(connect_d, reply);
         close(connect_d);
         exit(0);
     }
@@ -226,6 +231,7 @@ strcpy(directory,fullpath);
   }
   }
 }
+
 
 
 
