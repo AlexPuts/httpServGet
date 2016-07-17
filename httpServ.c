@@ -153,7 +153,7 @@ strcpy(fullpath,directory);
 
       if(!fork()){
       close(listener_d);
-      if (say(connect_d,"Server \r\n Version 1.0\r\n")!=-1)
+      if (say(connect_d,"")!=-1)
       read_in (connect_d, buf,sizeof(buf));
       //puts(buf);
       if(strncasecmp(" GET",buf,4)){
@@ -185,11 +185,11 @@ strcpy(fullpath,directory);
         int fd = open(directory, O_RDONLY);
         int sz = lseek(fd, 0, SEEK_END);;
 
-        sprintf(reply, "HTTP/1.1 200 OK\r\n"
-                       "Content-Type: text/html\r\n"
+        sprintf(reply, "HTTP/1.0 200 OK\r\n"
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
                        "\r\n", sz);
+
         say(connect_d, reply);
 
            off_t offset = 0;
