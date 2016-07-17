@@ -27,7 +27,7 @@ int read_in(int socket, char *buf, int len)
 {
   char *s =buf;
   int slen=len;
-  int c=recv(socket, s, slen,0);
+  int c=recv(socket, s, slen,MSG_NOSIGNAL);
   while ((c>0)&&(s[c-1]!='\n')){
   s+=c; slen-=c;
   c=recv(socket, s,slen,0);
@@ -131,7 +131,7 @@ int main(int argc, char **argv){
   struct sockaddr_storage client_addr;
   unsigned int address_size=sizeof(client_addr);
   //puts("Waiting for connection");
-  char buf[255]={0};;
+
   char input[200]={0};
   int position_1=0;
   int position_2=0;
@@ -140,17 +140,22 @@ int main(int argc, char **argv){
   exit(0);
   }
 
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+/*
  if(fork()){
   wait();
   }
-
+*/
 char fullpath[50]={0};
 strcpy(fullpath,directory);
   while (1){
+    wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
     if (connect_d==-1)
       error("Cant open secondary socket");
-
+      char buf[255]={0};
       if(!fork()){
       close(listener_d);
       if (1)
@@ -183,16 +188,15 @@ strcpy(fullpath,directory);
       strncat(directory,htmlpath,strlen(htmlpath));
       //puts("THE PATH IS:");
       //puts(directory);
-
      //Reply 200 if file exists
-          char reply[1024];
+          char reply[1024]={0};
     if (access(directory, F_OK) != -1)
     {
         // file exists, get its size
         int fd = open(directory, O_RDONLY);
         int sz = lseek(fd, 0, SEEK_END);;
 
-        sprintf(reply, "HTTP/1.1 200 OK\r\n"
+        sprintf(reply, "HTTP/1.0 200 OK\r\n"
                        "Content-Type: text/html\r\n"
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
@@ -209,35 +213,23 @@ strcpy(fullpath,directory);
            close(connect_d);
            exit(0);
     }
-
     //Reply 404 if file doesnt exist
  else
     {
-        strcpy(reply, "HTTP/1.1 404 Not Found\r\n"
-                      "Content-Type: text/html\r\n"
-                      "Content-length: 107\r\n"
-                      "Connection: close\r\n"
-                      "\r\n");
-        say(connect_d, reply);
-        strcpy(reply, "<body>\n<p>404 Request file not found.</p>\n</body>\n</html>\r\n");
+        strcpy(reply, "HTTP/1.1 404 ERROR\r\n"
+                      "Version: HTTP/1.1\r\n"
+                      "Content-Type: text/html; charset=utf-8\r\n"
+                      "Content-Length: 0 \r\n\r\n");
         say(connect_d, reply);
         close(connect_d);
+        break;
         exit(0);
     }
-
-
 }
 close(connect_d);
 strcpy(directory,fullpath);
  exit(0);
   }
   }
+  return 0;
 }
-
-
-
-
-
-
-
-
