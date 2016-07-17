@@ -160,13 +160,16 @@ strcpy(fullpath,directory);
       strcpy(input,buf);
       while(i<20)
       { //printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
-      if(buf[i]==108){
-      //printf("%d",i);
+      if(buf[i]==46){
+      if(buf[i+1]==104)
+      if(buf[i+2]==116)
+      if(buf[i+3]==109)
       break;
+      //printf("%d",i);
       }
       i++;
       }
-      position_2=i+1;
+      position_2=i+3+2;
       //printf("I = %d", i); //position_2=15;
       strncpy(htmlpath,&buf[position_1],position_2-position_1);
       //printf("%d",position_2);
