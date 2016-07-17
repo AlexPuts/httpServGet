@@ -51,7 +51,7 @@ int open_listener_socket()
 {
   int s=socket(PF_INET, SOCK_STREAM,0);
   if (s==-1)
-    //error("Can't open socket");
+    error("Can't open socket");
   return s;
 }
 
@@ -64,17 +64,17 @@ void bind_to_port(int socket, int port)
   int reuse=1;
 
   if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))==-1)
-    //error("Cant set up socket reuse parameter");
+    error("Cant set up socket reuse parameter");
   int c=bind(socket, (struct sockaddr *)&name, sizeof(name));
   if (c==-1)
-    //error("Cant bind the socket");
+    error("Cant bind the socket");
 }
 
 int say(int socket, char *s)
 {
   int result=send(socket, s, strlen(s),0);
   if (result==-1)
-    //fprintf(stderr, "%s: %s\n", "Communication Error !", strerror(errno));
+    fprintf(stderr, "%s: %s\n", "Communication Error !", strerror(errno));
   return result;
 }
 
@@ -91,8 +91,8 @@ void handle_shutdown(int sig)
 int main(int argc, char **argv){
 
     if(argc == 1) { // если запускаем без аргументов, выводим справку
-        //printf("usage:\n");
-        //printf("-h <ip> -p <port> -d <directory>");
+        printf("usage:\n");
+        printf("-h <ip> -p <port> -d <directory>");
         return 0;
     }
     // Arguments
@@ -118,19 +118,19 @@ int main(int argc, char **argv){
         }
 
     }
-        //puts(ip);
-        //puts(port);
-        //puts(directory);
+        /*puts(ip);
+        puts(port);
+        puts(directory);*/
 
  if(catch_signal(SIGINT, handle_shutdown)==-1)
-  //error("Cant set the interrupt handler");
+  error("Cant set the interrupt handler");
   listener_d=open_listener_socket();
   bind_to_port(listener_d,atoi(port));
   if(listen(listener_d,10)==-1)
-    //error("Cant listen");
+    error("Cant listen");
   struct sockaddr_storage client_addr;
   unsigned int address_size=sizeof(client_addr);
-  //puts("Waiting for connection");
+  puts("Waiting for connection");
   char buf[255]={0};;
   char input[200]={0};
   int position_1=4;
@@ -171,8 +171,8 @@ strcpy(fullpath,directory);
       strncpy(htmlpath,&buf[position_1],position_2-position_1);
       //printf("%d",position_2);
       strncat(directory,htmlpath,strlen(htmlpath));
-      puts("THE PATH IS:");
-      puts(directory);
+      //puts("THE PATH IS:");
+      //puts(directory);
 
      //Reply 200 if file exists
           char reply[1024];
