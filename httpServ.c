@@ -84,7 +84,7 @@ void handle_shutdown(int sig)
 {
   if(listener_d)
     close(listener_d);
-  fprintf(stderr, "Пока !\n");
+  //fprintf(stderr, "Пока !\n");
   exit(0);
 }
 
@@ -114,13 +114,13 @@ int main(int argc, char **argv){
 
 				case 'd': strncpy(directory, optarg, MAX_ARG); break;
 
-				default: printf("usage:\n -h <ip> -p <port> -d <directory>\n"); exit(1);
+				default: /*printf("usage:\n -h <ip> -p <port> -d <directory>\n");*/ exit(1);
         }
 
     }
-        puts(ip);
-        puts(port);
-        puts(directory);
+        //puts(ip);
+        //puts(port);
+        //puts(directory);
 
  if(catch_signal(SIGINT, handle_shutdown)==-1)
   error("Cant set the interrupt handler");
@@ -130,7 +130,7 @@ int main(int argc, char **argv){
     error("Cant listen");
   struct sockaddr_storage client_addr;
   unsigned int address_size=sizeof(client_addr);
-  puts("Waiting for connection");
+  //puts("Waiting for connection");
   char buf[255]={0};;
   char input[200]={0};
   int position_1=0;
@@ -159,7 +159,7 @@ strcpy(fullpath,directory);
       if(strncasecmp(" GET",buf,4)){
       strcpy(input,buf);
       while(i<sizeof(buf))
-      { printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
+      { //printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
       if(buf[i]==108){
       //printf("%d",i);
       break;
@@ -181,8 +181,8 @@ strcpy(fullpath,directory);
       strncpy(htmlpath,&buf[position_1],position_2-position_1);
       //printf("%d",position_2);
       strncat(directory,htmlpath,strlen(htmlpath));
-      puts("THE PATH IS:");
-      puts(directory);
+      //puts("THE PATH IS:");
+      //puts(directory);
 
      //Reply 200 if file exists
           char reply[1024];
@@ -200,6 +200,8 @@ strcpy(fullpath,directory);
         say(connect_d, reply);
 
            off_t offset = 0;
+
+
         while (offset < sz)
         {
             offset = sendfile(connect_d, fd, &offset, sz - offset);
