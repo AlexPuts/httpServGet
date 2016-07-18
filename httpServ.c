@@ -12,7 +12,7 @@
 #include <time.h>
 #include <string.h>
 #include <signal.h>
-#define MAX_ARG 20
+#define MAX_ARG 200
 #include <fcntl.h>
 int catch_signal(int sig, void(*handler)(int))
 {
@@ -96,10 +96,10 @@ int main(int argc, char **argv){
         return 0;
     }
     // Arguments
-    char ip[20]={0};
-    char port[20]={0};
-    char directory[30]={0};
-    char htmlpath[20]={0};
+    char ip[200]={0};
+    char port[200]={0};
+    char directory[200]={0};
+    char htmlpath[200]={0};
 
     char *opts = "h:p:d:"; // доступные опции, каждая принимает аргумент
     char op; // а тут оператор
@@ -139,23 +139,20 @@ int main(int argc, char **argv){
   if(fork()){
   exit(0);
   }
-
+  /*Descriptors close*/
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
-/*
- if(fork()){
-  wait();
-  }
-*/
-char fullpath[50]={0};
+
+
+char fullpath[250]={0};
 strcpy(fullpath,directory);
   while (1){
     wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
     if (connect_d==-1)
       error("Cant open secondary socket");
-      char buf[255]={0};
+      char buf[1255]={0};
       if(!fork()){
       close(listener_d);
       if (1)
@@ -165,13 +162,16 @@ strcpy(fullpath,directory);
       strcpy(input,buf);
       while(i<sizeof(buf))
       { //printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
-      if(buf[i]==108){
-      //printf("%d",i);
+      if(buf[i]==120){
+      if(buf[i+1]==46)
+      if(buf[i+2]==104)
+      if(buf[i+3]==116)
+      if(buf[i+4]==109)
       break;
       }
       i++;
       }
-      position_2=i+1;
+      position_2=i+6;
       i=0;
       while(i<sizeof(buf))
       {
@@ -208,23 +208,20 @@ strcpy(fullpath,directory);
         {
             offset = sendfile(connect_d, fd, &offset, sz - offset);
         }
+        say(connect_d, EOF);
            close(connect_d);
            exit(0);
     }
     //Reply 404 if file doesnt exist
     else
     {
-        char* not_found="<html>\n<head>\n<title>Not Found</title>\n</head>\r\n";
-        char* not_found_body="<html>\n<head>\n<title>Not Found</title>\n</head>\r\n";
-        sprintf(reply, "HTTP/1.1 404 Not Found\r\n"
+        sprintf(reply, "HTTP/1.0 404 Not Found\r\n"
                       "Content-Type: text/html\r\n"
-                      "Content-length: %d\r\n"
+                      "Content-length: 0\r\n"
                       "Connection: close\r\n"
-                      "\r\n", (strlen(not_found)+strlen(not_found_body)));
+                      "\r\n");
 
         ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
-        strcpy(reply,not_found);
-        send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
         close(connect_d);
         exit(0);
     }
