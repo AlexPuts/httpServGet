@@ -225,9 +225,8 @@ strcpy(fullpath,directory);
         ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
         strcpy(reply,not_found);
         send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
-        strcpy(reply, not_found_body);
-        send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
-
+        close(connect_d);
+        exit(0);
     }
 }
 close(connect_d);
