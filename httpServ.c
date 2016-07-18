@@ -212,12 +212,22 @@ strcpy(fullpath,directory);
            exit(0);
     }
     //Reply 404 if file doesnt exist
- else
+    else
     {
-        strcpy(reply,"HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\nContent-Type: text/html\r\n\r\n");
-        say(connect_d, reply);
-        close(connect_d);
-        exit(0);
+        char* not_found="<html>\n<head>\n<title>Not Found</title>\n</head>\r\n";
+        char* not_found_body="<html>\n<head>\n<title>Not Found</title>\n</head>\r\n";
+        sprintf(reply, "HTTP/1.1 404 Not Found\r\n"
+                      "Content-Type: text/html\r\n"
+                      "Content-length: %d\r\n"
+                      "Connection: close\r\n"
+                      "\r\n", (strlen(not_found)+strlen(not_found_body)));
+
+        ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+        strcpy(reply,not_found);
+        send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+        strcpy(reply, not_found_body);
+        send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+
     }
 }
 close(connect_d);
