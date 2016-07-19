@@ -55,12 +55,12 @@ int open_listener_socket()
   return s;
 }
 
-void bind_to_port(int socket, int port)
+void bind_to_port(int socket, int port, char* ip)
 {
   struct sockaddr_in name;
   name.sin_family=PF_INET;
   name.sin_port=(in_port_t)htons(port);
-  name.sin_addr.s_addr=htonl(INADDR_ANY);
+  name.sin_addr.s_addr=inet_addr(ip);
   int reuse=1;
 
   if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))==-1)
@@ -125,7 +125,7 @@ int main(int argc, char **argv){
  if(catch_signal(SIGINT, handle_shutdown)==-1)
   error("Cant set the interrupt handler");
   listener_d=open_listener_socket();
-  bind_to_port(listener_d,atoi(port));
+  bind_to_port(listener_d,atoi(port),ip);
   if(listen(listener_d,10)==-1)
     error("Cant listen");
   struct sockaddr_storage client_addr;
@@ -147,6 +147,12 @@ int main(int argc, char **argv){
 
 char fullpath[250]={0};
 strcpy(fullpath,directory);
+  fork();
+  fork();
+  fork();
+  fork();
+  fork();
+  fork();
   while (1){
     wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
