@@ -55,12 +55,12 @@ int open_listener_socket()
   return s;
 }
 
-void bind_to_port(int socket, int port, char* ip)
+void bind_to_port(int socket, int port)
 {
   struct sockaddr_in name;
   name.sin_family=PF_INET;
   name.sin_port=(in_port_t)htons(port);
-  name.sin_addr.s_addr=inet_addr(ip);
+  name.sin_addr.s_addr=htonl(INADDR_ANY);
   int reuse=1;
 
   if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))==-1)
@@ -125,7 +125,7 @@ int main(int argc, char **argv){
  if(catch_signal(SIGINT, handle_shutdown)==-1)
   error("Cant set the interrupt handler");
   listener_d=open_listener_socket();
-  bind_to_port(listener_d,atoi(port),ip);
+  bind_to_port(listener_d,atoi(port));
   if(listen(listener_d,10)==-1)
     error("Cant listen");
   struct sockaddr_storage client_addr;
@@ -144,15 +144,12 @@ int main(int argc, char **argv){
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 
-
 char fullpath[250]={0};
 strcpy(fullpath,directory);
-  fork();
-  fork();
-  fork();
-  fork();
-  fork();
-  fork();
+
+fork();
+fork();
+fork();
   while (1){
     wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
@@ -199,24 +196,23 @@ strcpy(fullpath,directory);
     if (access(directory, F_OK) != -1)
     {
         // file exists, get its size
-        int fd = open(directory, O_RDONLY|O_NONBLOCK);
-        int sz = lseek(fd, 0, SEEK_END);
+        int fd = open(directory, O_RDONLY);
+        int sz = lseek(fd, 0, SEEK_END);;
 
         sprintf(reply, "HTTP/1.0 200 OK\r\n"
                        "Content-Type: text/html\r\n"
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
-                       "\r\n", sz);
+                       "\r\n", sz-1);
         say(connect_d, reply);
            off_t offset = 0;
 
-
-        while (offset < sz)
+        while (offset < sz-1)
         {
             offset = sendfile(connect_d, fd, &offset, sz - offset);
         }
            close(connect_d);
-
+           exit(0);
     }
     //Reply 404 if file doesnt exist
     else
