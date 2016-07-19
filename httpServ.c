@@ -14,14 +14,6 @@
 #include <signal.h>
 #define MAX_ARG 200
 #include <fcntl.h>
-int catch_signal(int sig, void(*handler)(int))
-{
-  struct sigaction action;
-  action.sa_handler=handler;
-  sigemptyset(&action.sa_mask);
-  action.sa_flags=0;
-  return sigaction(sig,&action, NULL);
-}
 
 int read_in(int socket, char *buf, int len)
 {
@@ -41,18 +33,9 @@ else
 return len-slen;
 }
 
-void error(char *msg)
-{
-fprintf(stderr, "%s: %s\n", msg,strerror(errno));
-exit(1);
-}
-
 int open_listener_socket()
 {
   int s=socket(PF_INET, SOCK_STREAM,0);
-  if (s==-1)
-    error("Can't open socket");
-  return s;
 }
 
 void bind_to_port(int socket, int port)
@@ -63,30 +46,16 @@ void bind_to_port(int socket, int port)
   name.sin_addr.s_addr=htonl(INADDR_ANY);
   int reuse=1;
 
-  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))==-1)
-    error("Cant set up socket reuse parameter");
+ setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int));
   int c=bind(socket, (struct sockaddr *)&name, sizeof(name));
-  if (c==-1)
-    error("Cant bind the socket");
 }
 
 int say(int socket, char *s)
 {
   int result=send(socket, s, strlen(s),0);
-  if (result==-1)
-    fprintf(stderr, "%s: %s\n", "Communication Error !", strerror(errno));
-  return result;
 }
 
 int listener_d;
-
-void handle_shutdown(int sig)
-{
-  if(listener_d)
-    close(listener_d);
-  //fprintf(stderr, "Пока !\n");
-  exit(0);
-}
 
 int main(int argc, char **argv){
 
@@ -122,8 +91,6 @@ int main(int argc, char **argv){
         //puts(port);
         //puts(directory);
 
- if(catch_signal(SIGINT, handle_shutdown)==-1)
-  error("Cant set the interrupt handler");
   listener_d=open_listener_socket();
   bind_to_port(listener_d,atoi(port));
   if(listen(listener_d,10)==-1)
@@ -153,14 +120,11 @@ fork();
   while (1){
     wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
-    if (connect_d==-1)
-      error("Cant open secondary socket");
       char buf[1255]={0};
       if(!fork()){
       close(listener_d);
-      if (1)
+
       read_in (connect_d, buf,sizeof(buf));
-      puts(buf);
       if(strncasecmp(" GET",buf,4)){
       strcpy(input,buf);
       while(i<sizeof(buf))
@@ -203,11 +167,11 @@ fork();
                        "Content-Type: text/html\r\n"
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
-                       "\r\n", sz-1);
+                       "\r\n", sz);
         say(connect_d, reply);
            off_t offset = 0;
 
-        while (offset < sz-1)
+        while (offset < sz)
         {
             offset = sendfile(connect_d, fd, &offset, sz - offset);
         }
