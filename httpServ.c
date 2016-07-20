@@ -113,7 +113,15 @@ int main(int argc, char **argv){
 
 char fullpath[250]={0};
 strcpy(fullpath,directory);
-
+int fd = open(directory, O_RDONLY|O_NONBLOCK);
+fork();
+fork();
+fork();
+fork();
+fork();
+fork();
+fork();
+fork();
 fork();
 fork();
 fork();
@@ -156,7 +164,7 @@ fork();
       //puts("THE PATH IS:");
       //puts(directory);
      //Reply 200 if file exists
-    int fd = open(directory, O_RDONLY|O_NONBLOCK);
+
     if (fd >0)
     {
         char reply[1024]={0};
