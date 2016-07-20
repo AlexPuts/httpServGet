@@ -129,7 +129,6 @@ fork();
 fork();
 
   while (1){
-    wait();
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
       char buf[1255]={0};
       if(!fork()){
