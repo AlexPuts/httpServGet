@@ -156,38 +156,37 @@ fork();
       //puts("THE PATH IS:");
       //puts(directory);
      //Reply 200 if file exists
-          char reply[1024]={0};
-    if (access(directory, F_OK) != -1)
+    int fd = open(directory, O_RDONLY|O_NONBLOCK);
+    if (fd >0)
     {
-        // file exists, get its size
-        int fd = open(directory, O_RDONLY);
-        int sz = lseek(fd, 0, SEEK_END);;
+        char reply[1024]={0};
+        char buf[1024]={0};
+        //int sz = lseek(fd, 0, SEEK_END);
+        int sz = read(fd, buf, 1000);
 
         sprintf(reply, "HTTP/1.0 200 OK\r\n"
                        "Content-Type: text/html\r\n"
                        "Content-length: %d\r\n"
                        "Connection: close\r\n"
-                       "\r\n", sz);
+                       "\r\n"
+                       "%s"
+                       , sz,buf);
         say(connect_d, reply);
-           off_t offset = 0;
 
-        while (offset < sz)
-        {
-            offset = sendfile(connect_d, fd, &offset, sz - offset);
-        }
            close(connect_d);
            exit(0);
     }
     //Reply 404 if file doesnt exist
     else
     {
+    char reply[1024]={0};
         sprintf(reply, "HTTP/1.0 404 Not Found\r\n"
                       "Content-Type: text/html\r\n"
                       "Content-length: 0\r\n"
                       "Connection: close\r\n"
                       "\r\n");
 
-        ssize_t send_ret = send(connect_d, reply, strlen(reply), MSG_NOSIGNAL);
+        say(connect_d, reply);
         close(connect_d);
         exit(0);
     }
