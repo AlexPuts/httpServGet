@@ -113,10 +113,7 @@ int main(int argc, char **argv){
 
 char fullpath[250]={0};
 strcpy(fullpath,directory);
-int fd = open(directory, O_RDONLY|O_NONBLOCK);
-fork();
-fork();
-fork();
+
 fork();
 fork();
 fork();
@@ -164,14 +161,14 @@ fork();
       //puts("THE PATH IS:");
       //puts(directory);
      //Reply 200 if file exists
-
+    int fd = open(directory, O_RDONLY|O_NONBLOCK);
     if (fd >0)
     {
         char reply[1024]={0};
         char buf[1024]={0};
         //int sz = lseek(fd, 0, SEEK_END);
         int sz = read(fd, buf, 1000);
-
+        close(fd);
         sprintf(reply, "HTTP/1.0 200 OK\r\n"
                        "Content-Type: text/html\r\n"
                        "Content-length: %d\r\n"
@@ -180,7 +177,6 @@ fork();
                        "%s"
                        , sz,buf);
         say(connect_d, reply);
-
            close(connect_d);
            exit(0);
     }
@@ -206,3 +202,4 @@ strcpy(directory,fullpath);
   }
   return 0;
   }
+
