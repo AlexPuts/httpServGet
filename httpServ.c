@@ -114,19 +114,6 @@ int main(int argc, char **argv){
 char fullpath[250]={0};
 strcpy(fullpath,directory);
 
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
 
   while (1){
     int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
@@ -207,4 +194,3 @@ strcpy(directory,fullpath);
   }
   return 0;
   }
-
