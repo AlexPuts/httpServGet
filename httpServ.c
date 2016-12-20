@@ -70,11 +70,11 @@ int main(int argc, char **argv){
     char directory[200]={0};
     char htmlpath[200]={0};
 
-    char *opts = "h:p:d:"; // доступные опции, каждая принимает аргумент
-    char op; // а тут оператор
-    int opt; // каждая следующая опция попадает сюда
+    char *opts = "h:p:d:"; 
+    char op;
+    int opt;
 
-    while((opt = getopt(argc, argv, opts)) != -1) { // вызываем getopt пока она не вернет -1
+    while((opt = getopt(argc, argv, opts)) != -1) { 
         switch(opt) {
 
                 case 'h': strncpy(ip, optarg, MAX_ARG); break;
@@ -83,13 +83,11 @@ int main(int argc, char **argv){
 
 				case 'd': strncpy(directory, optarg, MAX_ARG); break;
 
-				default: /*printf("usage:\n -h <ip> -p <port> -d <directory>\n");*/ exit(1);
+				default:  exit(1);
         }
 
     }
-        //puts(ip);
-        //puts(port);
-        //puts(directory);
+
 
   listener_d=open_listener_socket();
   bind_to_port(listener_d,atoi(port));
@@ -97,7 +95,7 @@ int main(int argc, char **argv){
     error("Cant listen");
   struct sockaddr_storage client_addr;
   unsigned int address_size=sizeof(client_addr);
-  //puts("Waiting for connection");
+
 
   char input[200]={0};
   int position_1=0;
@@ -113,20 +111,9 @@ int main(int argc, char **argv){
 
 char fullpath[250]={0};
 strcpy(fullpath,directory);
-
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
-fork();
+for(i = 0 ; i < 3; i++){
+	fork();
+}
 
   while (1){
     wait();
@@ -139,7 +126,7 @@ fork();
       if(strncasecmp(" GET",buf,4)){
       strcpy(input,buf);
       while(i<sizeof(buf))
-      { //printf("CHAR  =  %c \n INT = %d ",buf[i],buf[i]);
+      {
       if(buf[i]==120){
       if(buf[i+1]==46)
       if(buf[i+2]==104)
@@ -154,25 +141,19 @@ fork();
       while(i<sizeof(buf))
       {
       if(buf[i]==32){
-      //printf("%d",i);
       break;
       }
       i++;
       }
       position_1=i+1;
-      //printf("I = %d", i); //position_2=15;
       strncpy(htmlpath,&buf[position_1],position_2-position_1);
-      //printf("%d",position_2);
       strncat(directory,htmlpath,strlen(htmlpath));
-      //puts("THE PATH IS:");
-      //puts(directory);
-     //Reply 200 if file exists
+     /*Reply 200 if file exists*/
     int fd = open(directory, O_RDONLY|O_NONBLOCK);
     if (fd >0)
     {
         char reply[1024]={0};
         char buf[1024]={0};
-        //int sz = lseek(fd, 0, SEEK_END);
         int sz = read(fd, buf, 1000);
         close(fd);
         sprintf(reply, "HTTP/1.0 200 OK\r\n"
