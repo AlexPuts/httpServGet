@@ -1,17 +1,10 @@
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 #include <sys/socket.h>
-#include <signal.h>
 #include <arpa/inet.h>
-#include <time.h>
-#include <string.h>
-#include <signal.h>
 #define MAX_ARG 200
 #include <fcntl.h>
 
@@ -20,25 +13,33 @@ int read_in(int socket, char *buf, int len)
   char *s =buf;
   int slen=len;
   int c=recv(socket, s, slen,MSG_NOSIGNAL);
-  while ((c>0)&&(s[c-1]!='\n')){
-  s+=c; slen-=c;
-  c=recv(socket, s,slen,0);
-}
+  while ((c>0)&&(s[c-1]!='\n'))
+  {
+	  s+=c; slen-=c;
+	  c=recv(socket, s,slen,0);
+  }
 if (c<0)
+{
   return c;
+}
 else if (c==0)
+{
   buf[0]='\0';
+}
 else
+{
   s[c-1]='\0';
+}
 return len-slen;
 }
 
 int open_listener_socket()
 {
   int s=socket(PF_INET, SOCK_STREAM,0);
+  return s;
 }
 
-void bind_to_port(int socket, int port)
+int bind_to_port(int socket, int port)
 {
   struct sockaddr_in name;
   name.sin_family=PF_INET;
@@ -48,11 +49,13 @@ void bind_to_port(int socket, int port)
 
  setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int));
   int c=bind(socket, (struct sockaddr *)&name, sizeof(name));
+  return c;
 }
 
 int say(int socket, char *s)
 {
   int result=send(socket, s, strlen(s),0);
+  return result;
 }
 
 int listener_d;
@@ -71,7 +74,6 @@ int main(int argc, char **argv){
     char htmlpath[200]={0};
 
     char *opts = "h:p:d:"; 
-    char op;
     int opt;
 
     while((opt = getopt(argc, argv, opts)) != -1) { 
@@ -92,7 +94,7 @@ int main(int argc, char **argv){
   listener_d=open_listener_socket();
   bind_to_port(listener_d,atoi(port));
   if(listen(listener_d,10)==-1)
-    error("Cant listen");
+  error("Cant listen");
   struct sockaddr_storage client_addr;
   unsigned int address_size=sizeof(client_addr);
 
@@ -101,8 +103,9 @@ int main(int argc, char **argv){
   int position_1=0;
   int position_2=0;
   int i=0;
-  if(fork()){
-  exit(0);
+  if(fork())
+  {
+	exit(0);
   }
   /*Descriptors close*/
     close(STDIN_FILENO);
@@ -116,71 +119,72 @@ for(i = 0 ; i < 3; i++){
 }
 
   while (1){
-    wait();
-    int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
+      wait();
+      int connect_d=accept(listener_d, (struct sockaddr *)&client_addr, &address_size);
       char buf[1255]={0};
       if(!fork()){
-      close(listener_d);
+		  close(listener_d);
 
-      read_in (connect_d, buf,sizeof(buf));
-      if(strncasecmp(" GET",buf,4)){
-      strcpy(input,buf);
-      while(i<sizeof(buf))
-      {
-      if(buf[i]==120){
-      if(buf[i+1]==46)
-      if(buf[i+2]==104)
-      if(buf[i+3]==116)
-      if(buf[i+4]==109)
-      break;
-      }
-      i++;
-      }
-      position_2=i+6;
-      i=0;
-      while(i<sizeof(buf))
-      {
-      if(buf[i]==32){
-      break;
-      }
-      i++;
-      }
-      position_1=i+1;
-      strncpy(htmlpath,&buf[position_1],position_2-position_1);
-      strncat(directory,htmlpath,strlen(htmlpath));
-     /*Reply 200 if file exists*/
-    int fd = open(directory, O_RDONLY|O_NONBLOCK);
-    if (fd >0)
-    {
-        char reply[1024]={0};
-        char buf[1024]={0};
-        int sz = read(fd, buf, 1000);
-        close(fd);
-        sprintf(reply, "HTTP/1.0 200 OK\r\n"
-                       "Content-Type: text/html\r\n"
-                       "Content-length: %d\r\n"
-                       "Connection: close\r\n"
-                       "\r\n"
-                       "%s"
-                       , sz,buf);
-        say(connect_d, reply);
-           close(connect_d);
-           exit(0);
-    }
-    //Reply 404 if file doesnt exist
-    else
-    {
-    char reply[1024]={0};
-        sprintf(reply, "HTTP/1.0 404 Not Found\r\n"
-                      "Content-Type: text/html\r\n"
-                      "Content-length: 0\r\n"
-                      "Connection: close\r\n"
-                      "\r\n");
+		  read_in (connect_d, buf,sizeof(buf));
+		  if(strncasecmp(" GET",buf,4)){
+		  strcpy(input,buf);
+		  while(i<sizeof(buf))
+		  {
+			  if(buf[i]==120){
+			  if(buf[i+1]==46)
+			  if(buf[i+2]==104)
+			  if(buf[i+3]==116)
+			  if(buf[i+4]==109)
+			  break;
+		  }
+			  i++;
+		  }
+		  position_2=i+6;
+		  i=0;
+		  while(i<sizeof(buf))
+		  {
+			  if(buf[i]==32)
+			  {
+				break;
+			  }
+			  i++;
+		  }
+		  position_1=i+1;
+		  strncpy(htmlpath,&buf[position_1],position_2-position_1);
+		  strncat(directory,htmlpath,strlen(htmlpath));
+		 /*Reply 200 if file exists*/
+		int fd = open(directory, O_RDONLY|O_NONBLOCK);
+		if (fd >0)
+		{
+			char reply[1024]={0};
+			char buf[1024]={0};
+			int sz = read(fd, buf, 1000);
+			close(fd);
+			sprintf(reply, "HTTP/1.0 200 OK\r\n"
+						   "Content-Type: text/html\r\n"
+						   "Content-length: %d\r\n"
+						   "Connection: close\r\n"
+						   "\r\n"
+						   "%s"
+						   , sz,buf);
+			say(connect_d, reply);
+			   close(connect_d);
+			   exit(0);
+		}
+		//Reply 404 if file doesnt exist
+		else
+		{
+		char reply[1024]={0};
+			sprintf(reply, "HTTP/1.0 404 Not Found\r\n"
+						  "Content-Type: text/html\r\n"
+						  "Content-length: 0\r\n"
+						  "Connection: close\r\n"
+						  "\r\n");
 
-        say(connect_d, reply);
-        close(connect_d);
-        exit(0);
-    }
+			say(connect_d, reply);
+			close(connect_d);
+			exit(0);
+		}
 }
 close(connect_d);
 strcpy(directory,fullpath);
